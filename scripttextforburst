@@ -1,0 +1,164 @@
+sudo apt update && apt upgrade
+
+sudo apt install default-jre-headless -y
+
+mkdir Brswallet
+
+#navigate to burst wallet site
+cd /Brswallet
+
+Download latest Brs zip file then extract to home/Brswallet #directory
+https://github-releases.githubusercontent.com/163338155/cfc05180-97be-11eb-8ba7-f5fe9cf4d3aa?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20210415%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20210415T202351Z&X-Amz-Expires=300&X-Amz-Signature=f34a4c71636d8a1cbe1f1d817aa1fbb78b41b3a008a0f20c6b56f0b91ba18d54&X-Amz-SignedHeaders=host&actor_id=15704035&key_id=0&repo_id=163338155&response-content-disposition=attachment%3B%20filename%3Dburstcoin-3.0.0.zip&response-content-type=application%2Foctet-stream
+
+sudo apt install mariadb-server
+
+phoenixnap.com
+How to Create MariaDB User and Grant Privileges
+3-4 minutes
+
+One of the most common tasks when administering a database is to oversee access and permissions. MariaDB is an open-source, fully compatible, relational database management system (RDBMS). The MariaDB client makes it easy to add new users and grant them different degrees of privileges.
+
+This simple tutorial shows you how to create a MariaDB user, and then how to grant privileges to the newly created user.
+
+tutorial header on creating and assigning privileges in MariaDB
+
+Enter the following command in your command-line terminal to access the MariaDB client shell:
+
+sudo mysql -u root
+
+If your root user has a predefined password, modify the command to reflect that fact:
+
+sudo mysql -u root -p
+
+Enter your password and access the MariaDB client.
+
+MariaDB shell successfully accessed
+
+If you do not have any databases created yet, you can easily do so by typing the following command in your MariaDB client shell:
+
+CREATE DATABASE 'yourDB';
+
+Access a list of existing databases by typing this command:
+
+SHOW DATABASES;
+
+The database we just created is on the list.
+
+new mariadb database is now available.\
+
+To create a new MariaDB user, type the following command:
+
+CREATE USER 'user1'@localhost IDENTIFIED BY 'password1';
+
+In this case, we use the ‘localhost’ host-name and not the server’s IP. This practice is commonplace if you plan to SSH in to your server, or when using the local client to connect to a local MySQL server.
+
+Once you create user1, check its status by entering:
+
+SELECT User FROM mysql.user;
+
+The output lists all existing users.
+
+example of listing existing users in mariadb
+
+The newly created user does not have privileges to manage databases nor to access the MariaDB shell.
+
+To grant all privileges to user1:
+
+GRANT ALL PRIVILEGES ON *.* TO 'user1'@localhost IDENTIFIED BY 'password1';
+
+The *.* in the statement refers to the database or table for which the user is given privileges. This specific command provides access to all databases located on the server. As this might be a major security issue, you should replace the symbol with the name of the database you are providing access to.
+
+To grant privileges only for yourDB, type the following statement:
+
+GRANT ALL PRIVILEGES ON 'yourDB'.* TO 'user1'@localhost;
+
+It’s crucial to refresh the privileges once new ones have been awarded with the command:
+
+FLUSH PRIVILEGES;
+
+The user you have created now has full privileges and access to the specified database and tables.
+
+Once you have completed this step, you can verify the new user1 has the right permissions by using the following statement:
+
+SHOW GRANTS FOR 'user1'@localhost;
+
+The information provided by the system is displayed on the terminal.
+
+The terminal displays the privileges grated to a specific user.
+
+If you need to remove a user, you can employ the DROP statement:
+
+DROP USER 'user1'@localhost;
+
+The output confirms that user1 no longer has access nor privileges.
+
+example of how to remove a mariadb user with drop
+
+You have successfully created a MariaDB user and granted full user privileges. This basic task should quickly become a routine. There are numerous options to customize privileges and tailor them to your requirements.
+
+We encourage you to explore the many available options that allow you to administer your databases securely and effectively.
+
+
+#go to https://www.tecmint.com/change-mysql-mariadb-root-password/
+
+sudo mysql -u root -p       
+#enter system password
+
+USE mysql;
+
+UPDATE user SET password=PASSWORD('YourPasswordHere') WHERE User='root' AND Host = 'localhost';
+
+exit;
+
+#go to https://phoenixnap.com/kb/how-to-create-mariadb-user-grant-privileges
+
+sudo mysql -u root -pYourPasswordHere
+
+CREATE DATABASE burstwallet;
+
+SHOW DATABASES;
+
+CREATE USER 'brs_user'@'localhost' IDENTIFIED BY 'YourPasswordHere';
+
+SELECT User FROM mysql.user;
+
+GRANT ALL PRIVILEGES ON burstwallet.* TO 'brs_user'@'localhost';
+
+FLUSH PRIVILEGES;
+
+SHOW GRANTS FOR 'brs_user'@localhost;
+
+#Navigate to Home/Brswallet/conf directory make copy of brs-default.properties and rename brs.properties. open brs.properties and edit #### DATABASE #### to
+
+# Database connection JDBC url
+# Append ;AUTO_SERVER=TRUE to enable automatic mixed mode access.
+# DB.Url=jdbc:mariadb://localhost:3306/burstwallet
+# DB.Username=
+# DB.Password=
+
+# We are using file based as default
+DB.Url=jdbc:mariadb://localhost:3306/burstwallet
+DB.Username=brs_user
+DB.Password=YourPasswordHere
+
+
+
+#Download burstblockdump.sql cut and paste it to Brswallet directory
+
+cd Brswallet
+
+mysql -u brs_user -pYourPasswordHere burstwallet < burstblockdump.sql
+
+#wait for it to complete
+
+java -jar burst.jar
+
+#When done press the "Ctrl" key and C at the same time to shutdown the wallet 
+
+#If you want to share your blockchain
+
+mysqldump -u brs_user -pYourPasswordHere burstwallet > burstblockdump.sql
+
+
+
+

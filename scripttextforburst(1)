@@ -1,0 +1,73 @@
+sudo apt update && apt upgrade
+
+sudo apt install default-jre-headless -y
+
+mkdir Brswallet
+
+#navigate to burst wallet site download latest Brs zip file then extract to home/Brswallet #directory
+
+sudo apt install mariadb-server
+
+#go to https://www.tecmint.com/change-mysql-mariadb-root-password/
+
+sudo mysql -u root -p       
+#enter system password
+
+USE mysql;
+
+UPDATE user SET password=PASSWORD('YourPasswordHere') WHERE User='root' AND Host = 'localhost';
+
+exit;
+
+#go to https://phoenixnap.com/kb/how-to-create-mariadb-user-grant-privileges
+
+sudo mysql -u root -pYourPasswordHere
+
+CREATE DATABASE burstwallet;
+
+SHOW DATABASES;
+
+CREATE USER 'brs_user'@'localhost' IDENTIFIED BY 'YourPasswordHere';
+
+SELECT User FROM mysql.user;
+
+GRANT ALL PRIVILEGES ON burstwallet.* TO 'brs_user'@'localhost';
+
+FLUSH PRIVILEGES;
+
+SHOW GRANTS FOR 'brs_user'@localhost;
+
+#Navigate to Home/Brswallet/conf directory make copy of brs-default.properties and rename brs.properties. open brs.properties and edit #### DATABASE #### to
+
+# Database connection JDBC url
+# Append ;AUTO_SERVER=TRUE to enable automatic mixed mode access.
+# DB.Url=jdbc:mariadb://localhost:3306/burstwallet
+# DB.Username=
+# DB.Password=
+
+# We are using file based as default
+DB.Url=jdbc:mariadb://localhost:3306/burstwallet
+DB.Username=brs_user
+DB.Password=YourPasswordHere
+
+
+
+#Download burstblockdump.sql cut and paste it to Brswallet directory
+
+cd Brswallet
+
+mysql -u brs_user -pYourPasswordHere burstwallet < burstblockdump.sql
+
+#wait for it to complete
+
+java -jar burst.jar
+
+#When done press the "Ctrl" key and C at the same time to shutdown the wallet 
+
+#If you want to share your blockchain
+
+mysqldump -u brs_user -pYourPasswordHere burstwallet > burstblockdump.sql
+
+
+
+
