@@ -1,0 +1,33 @@
+Resurrecting the legacy Burstcoin format while preserving modern Signum Node backend optimizations requires a code-level software rollback fork. Instead of merging the two node databases (which will cause instant schema corruption), you must strip out the 2021 Signum consensus layers from the modern code, forcing it to fall back onto the historic BURST ruleset. [1]
+Here is the architectural engineering plan to build this hybrid "Burstcoin Revival" client:
+[Modern Signum-Node Codebase] ──> (Strip PoC+ Commitments) ──> (Revert Block 878,000 Logic)
+                                                                       │
+[Legacy Burstcoin Ruleset]    ──> (Hardcode 2014 Genesis Block) ───────┴──> [Revived Burstcoin Node]
+
+
+Step 1: Strip Out PoC+ Hashing and StakingThe primary barrier to legacy mining is Signum's Proof-of-Commitment (PoC+) engine. You must eliminate the staking multiplier calculations so the node evaluates data strictly using drive capacity.Locate the Consensus Engine: Open the core block validation pipeline classes within your local repository clone:src/brs/consensus/PoCPlusConsensus.java (or similar network validation path).Change the Deadline Math: Locate the calculation where the node evaluates a miner's deadline based on their locked SIGNA balance. Alter the return logic to completely bypass the commitment scaling loop:java// Force the node to read target deadlines using 100% pure disk capacity, ignoring commitments
+public long getEffectiveDeadline(long rawDeadline, long committedBalance, long totalNetworkSpace) {
+    return rawDeadline; 
+}
+Use code with caution.
+
+Step 2: Neutralize the Block 878,000 Migration TriggerThe original codebase contains automated triggers that dynamically shifted the database architecture at block heights 875,500 and 878,000.Locate the Fork Manager: Open the system constants file handling network upgrades (usually src/brs/BlockchainVersion.java or Constants.java).Shift the Activation Point: Find the line assigning the Signum upgrade height (BURST_SIGNUM_HARD_FORK_HEIGHT = 875500). Set this activation to an unreachable block number to ensure the legacy processing rules remain permanently active:java// Push the modern upgrade boundary to an impossible number to keep old PoC alive indefinitely
+public static final int SIGNUM_FORK_HEIGHT = 999999999;
+Use code with caution.
+
+Step 3: Align Database Schemas and Addressing SchemesModern Signum nodes use the TS- or S- prefix structure for cryptographic account addressing and database string tracking. Legacy wallets and plot files expect the BURST- prefix identifier.Revert Address Conversions: Locate the cryptographic account wrapper module (src/brs/crypto/Convert.java or Account.java).Modify Address Encoding: Alter the regex filters and validation configurations to reject SIGNA naming conventions and read old strings natively:java// Change the active string compiler array back to legacy parameters
+public static final String ALPHABET = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+public static final String PREFIX = "BURST"; 
+Use code with caution.
+
+Step 4: Isolate P2P Discovery (Prevent Mainnet Overlaps)If your revived client uses the standard peer-to-peer port configuration, it will attempt to bridge with modern active Signum nodes. The mainnet nodes will immediately drop your packets for submitting block mismatches.Open Node Configuration Templates: Edit the default parameters mapping in src/brs/configuration/Settings.java (or the default node.properties file).Shift Networking Boundaries: Hardcode an alternate peer discovery port that separates your chain from the rest of the web:properties# Default Signum uses 8123 / 8125. Move your revival network completely off-grid.
+node.p2pPort = 7123
+node.apiPort = 7125
+Use code with caution.
+
+Step 5: Initialize the Genesis State
+To launch this project as a distinct revival token chain rather than tracking the existing ledger history, you must overwrite the foundational block signatures. [1]
+Locate the Genesis Engine: Open src/brs/Genesis.java (or the initial block JSON setup array).
+Define Your Base State: Swap out the historical block payload data with your own customized public key array, setting the starting account balances back to zero. This cleanly detaches your network infrastructure from the modern Signum ledger, establishing a secure environment for legacy miner connections. [1]
+
+🚀 Running the Resulting BinaryOnce your modifications are compiled via Maven or Gradle (mvn clean package), you will have a modernized node package that thinks it is 2015.Spin up multiple instances of your custom binary on your Linux servers to form a secure, closed network framework.Distribute the client software to your users.Your miners can now deploy the historic Burstcoin Android Wallet or legacy desktop plotting engines, point their transaction streams to your custom port, and mine on a revived legacy architecture without getting rejected.
