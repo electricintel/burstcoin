@@ -31,3 +31,7 @@ Locate the Genesis Engine: Open src/brs/Genesis.java (or the initial block JSON 
 Define Your Base State: Swap out the historical block payload data with your own customized public key array, setting the starting account balances back to zero. This cleanly detaches your network infrastructure from the modern Signum ledger, establishing a secure environment for legacy miner connections. [1]
 
 🚀 Running the Resulting BinaryOnce your modifications are compiled via Maven or Gradle (mvn clean package), you will have a modernized node package that thinks it is 2015.Spin up multiple instances of your custom binary on your Linux servers to form a secure, closed network framework.Distribute the client software to your users.Your miners can now deploy the historic Burstcoin Android Wallet or legacy desktop plotting engines, point their transaction streams to your custom port, and mine on a revived legacy architecture without getting rejected.
+
+
+Below is a link to the miner and plotter BurstCoin wallet for Android
+https://drive.google.com/file/d/15-4PrxP5G1aNY6sUBWPh9oOhf174Yn_j/view?usp=drivesdk
